@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.data.CsvData;
 import com.example.demo.data.CsvRepository;
+import com.example.demo.exceptions.CsvParsingException;
 import com.example.demo.exceptions.CsvReadingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,7 @@ public class CsvService {
 
     public List<CsvData> saveFile(final MultipartFile file){
         final var csvData= readFile(file);
+        //makesure data is unique
         csvRepository.saveAll(csvData);
         return csvData;
 
@@ -42,5 +44,20 @@ public class CsvService {
         final var allData = csvRepository.findAll();
         return csvParser.parseData(allData);
 
+    }
+
+    public boolean deleteAllData() {
+        csvRepository.deleteAll();
+        return true;
+    }
+
+    public String getAllCsvdataAsCsvByCode(final String code) {
+        final var allData = csvRepository.findCsvDataByCodeIgnoreCase(code);
+        try {
+            return csvParser.parseData(allData);
+        } catch (IOException e) {
+            throw new CsvParsingException(
+                    String.format("An error happened while parsing csvData for code %s", code));
+        }
     }
 }
