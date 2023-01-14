@@ -36,7 +36,8 @@ public class CsvService {
         try {
            return csvReader.read(file.getInputStream());
         } catch (final IOException e) {
-            throw new CsvReadingException(e);
+            throw new CsvReadingException("Cannot read invalid csv");
+
         }
     }
 
@@ -53,6 +54,9 @@ public class CsvService {
 
     public String getAllCsvdataAsCsvByCode(final String code) {
         final var allData = csvRepository.findCsvDataByCodeIgnoreCase(code);
+        if (allData.isEmpty()){
+            throw new CsvNotFoundException(String.format("Cannot find csv with code %s", code));
+        }
         try {
             return csvParser.parseData(allData);
         } catch (IOException e) {
